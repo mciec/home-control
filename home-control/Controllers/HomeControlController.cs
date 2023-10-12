@@ -12,6 +12,13 @@ public class HomeControlController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("countChars")]
+    public async Task<int> CountChars(string text)
+    {
+        return text.Length;
+    }
+
+    [Authorize]
     [HttpGet("items")]
     public async Task<List<string>> GetItems()
     {

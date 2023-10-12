@@ -39,20 +39,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+//app.UseCors(options => {
+//    options.WithOrigins("http://localhost:5173").AllowCredentials();
+//    options.AllowAnyHeader();
+//    options.AllowAnyMethod();
+//});
+app.UseStaticFiles();
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors(options => {
-    options.WithOrigins("http://localhost:5173").AllowCredentials();
-    //options.AllowCredentials();
-    options.AllowAnyHeader();
-    options.AllowAnyMethod();
-});
-app.UseStaticFiles();
-app.UseRouting();
 app.MapControllers();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+
 app.MapFallbackToFile("index.html");
 app.Run();
