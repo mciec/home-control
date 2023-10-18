@@ -1,10 +1,16 @@
 using System.Net;
 using home_control;
 using home_control.BackgroundServices;
+using home_control.Extensions;
 using home_control.Hub;
+using home_control.Models;
 using home_control.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -15,9 +21,25 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllersWithViews();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.ConfigureSqlContext(builder.Configuration);
+
+
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>(opt =>
+//    {
+//    })
+//    .AddEntityFrameworkStores<MyDbContext>()
+//    .AddDefaultTokenProviders()
+//    .AddSignInManager();
+
+builder.Services
+    .AddAuthentication(options =>
     {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = "External";
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        //options.LoginPath = "/api/user/loginexternal"; // Must be lowercase
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
         options.SlidingExpiration = true;
         options.Cookie.SameSite = SameSiteMode.None;
@@ -33,8 +55,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 return Task.CompletedTask;
             }
         };
-    });
-
+    })
+    .AddCookie("External")
+    .AddGoogle(options =>
+        {
+            options.ClientId = "706648688117-i11ou8bmhaj8qlep7li0t5fvptt8pm68.apps.googleusercontent.com";
+            options.ClientSecret = "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";
+            options.Scope.Add("profile");
+        });
 
 builder.Services.AddScoped<IUserService, UserService>();
 
